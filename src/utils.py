@@ -2,6 +2,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from consts import COMPANY_NAME_LIST
+
+company_links_object = {}
 
 def createDriver():
     driver = webdriver.Firefox()
@@ -15,6 +18,14 @@ def open_firt_page(driver, urlPath):
     driver.get(urlPath)
 
 def check_if_switch_page_is_possible(driver):
+    WebDriverWait(driver, 10).until(
+        EC.invisibility_of_element_located((By.CLASS_NAME, "searching-overlay"))
+    )
+    next_page_button_container = driver.find_element(By.CSS_SELECTOR, ".pagination li:last-child")
+
+    if 'disabled' in next_page_button_container.get_attribute('class'): 
+        return False, False
+    
     next_page_button = driver.find_element(By.CSS_SELECTOR, "a[data-value='nextPage']")
     return 'disabled' not in next_page_button.get_attribute('class').split(), next_page_button
 
@@ -30,10 +41,14 @@ def getAllModalButtonsOnPage(driver):
     )
     buttonList = driver.find_elements(By.CLASS_NAME, "preview-file")
 
+    page_links = []
+
     for button in buttonList:
         button_label_is_valid = button.get_attribute('innerText').split()[0] == '10-Q'
         if button_label_is_valid:
-            print(getDocumentLink(driver, button))
+            page_links.append(getDocumentLink(driver, button))
+    
+    return page_links
 
 def getDocumentLink(driver, open_modal_button):
     open_modal_button.click()
@@ -46,7 +61,25 @@ def getDocumentLink(driver, open_modal_button):
 def go_throw_pages(driver):
     is_page_switch_possible, next_page_button = check_if_switch_page_is_possible(driver)
 
+    pages_links = []
+
     while is_page_switch_possible:
         switch_page(driver, next_page_button)
-        #getAllModalButtonsOnPage(driver)
+        pages_links = getAllModalButtonsOnPage(driver)
         is_page_switch_possible, next_page_button = check_if_switch_page_is_possible(driver)
+    
+    return pages_links
+
+
+def get_company_links(driver, company_name):
+    urlPath = getUrl(company_name)
+    open_firt_page(driver, urlPath)
+    first_page_links = getAllModalButtonsOnPage(driver)
+    pages_links = go_throw_pages(driver)
+    result = first_page_links + pages_links
+    company_name = '_'.join(company_name.split('%2520')).lower()
+    company_links_object[company_name] = result
+
+def parse_all_links(driver):
+    for company_name in COMPANY_NAME_LIST:
+        get_company_links(driver, company_name)
