@@ -75,7 +75,6 @@ def go_throw_pages(driver):
     
     return pages_links
 
-
 def get_company_links(driver, company_name):
     urlPath = getUrl(company_name)
     open_firt_page(driver, urlPath)
