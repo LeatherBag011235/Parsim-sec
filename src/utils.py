@@ -1,8 +1,11 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from consts import COMPANY_NAME_LIST
+import requests
+from random import randint
 
 company_links_object = {}
 
@@ -83,3 +86,33 @@ def get_company_links(driver, company_name):
 def parse_all_links(driver):
     for company_name in COMPANY_NAME_LIST:
         get_company_links(driver, company_name)
+
+def download_file(company_name, url):
+    headers = {
+        'User-Agent': 'Your User-Agent String Here'
+    }
+
+    with requests.Session() as session:
+        response = session.get(url, headers=headers)
+
+        if response.status_code == 200:
+            page_content = response.text
+            file_name = url.split('/')[-1]
+
+            if not os.path.exists('./raw_files'):
+                os.makedirs('./raw_files')
+
+            if not os.path.exists(f'./raw_files/{company_name}'):
+                os.makedirs(f'./raw_files/{company_name}')
+
+            with open(f"./raw_files/{company_name}/{file_name}", "w", encoding="utf-8") as f:
+                f.write(page_content)
+
+            print(f"Page {company_name}/{file_name} downloaded successfully.")
+        else:
+            print(f"Failed to download the page. Status code: {response.status_code}")
+
+def download_files():
+    for key in company_links_object.keys():
+        for item in company_links_object[key]:
+            download_file(key, item)
