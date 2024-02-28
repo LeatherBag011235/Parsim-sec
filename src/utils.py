@@ -5,7 +5,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from consts import COMPANY_NAME_LIST
 import requests
-from random import randint
 
 company_links_object = {}
 
