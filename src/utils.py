@@ -1,10 +1,13 @@
 import os
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from consts import COMPANY_NAME_LIST
 import requests
+from bs4 import BeautifulSoup as bs
+import polars as pl
 
 company_links_object = {}
 
@@ -115,3 +118,81 @@ def download_files():
     for key in company_links_object.keys():
         for item in company_links_object[key]:
             download_file(key, item)
+
+def get_object():
+    result_obj = {}
+
+    for root, dirs, files in os.walk("./raw_files", topdown=False):
+        files = [f for f in files if f != '.DS_Store']
+        
+        if files:
+            relative_dir = os.path.relpath(root, "./raw_files")
+            
+            if relative_dir == '.':
+                continue
+            
+            files_list = [os.path.join(root, name) for name in files]
+            result_obj[relative_dir] = files_list
+
+    return result_obj
+
+def convert_to_txt(company_name, file_name):
+    with open(file_name) as file:
+        soup = bs(file, 'html.parser')
+        divs = soup.find_all('div')
+        text = ''
+        
+        for div in divs:
+            text += div.text
+            
+        text = re.sub(r'[^a-zA-Z0-9 ]', '', text)
+        text = re.sub(r'\b\S*?\d\S*\b', '', text)
+        text = re.sub(r'\s+', ' ', text)
+        text = text.strip()
+
+        if not os.path.exists('./cleared_files'):
+            os.makedirs('./cleared_files')
+
+        if not os.path.exists(f'./cleared_files/{company_name}'):
+            os.makedirs(f'./cleared_files/{company_name}')
+        
+        file_name_new = file_name.split('/')[-1]
+        file_name_new = file_name_new.split('.')[0] + '.txt'
+        
+        with open(f"./cleared_files/{company_name}/{file_name_new}", "w", encoding="utf-8") as f:
+                f.write(text)
+
+def convert_to_parquet(company_name, file_name):
+    with open(file_name) as file:
+        soup = bs(file, 'html.parser')
+        divs = soup.find_all('div')
+        text = ''
+        
+        for div in divs:
+            text += div.text
+            
+        text = re.sub(r'[^a-zA-Z0-9 ]', '', text)
+        text = re.sub(r'\b\S*?\d\S*\b', '', text)
+        text = re.sub(r'\s+', ' ', text)
+        text = text.strip()
+
+        if not os.path.exists('./cleared_files'):
+            os.makedirs('./cleared_files')
+
+        if not os.path.exists(f'./cleared_files/{company_name}'):
+            os.makedirs(f'./cleared_files/{company_name}')
+        
+        file_name_new = file_name.split('/')[-1]
+        file_name_new = file_name_new.split('.')[0] + '.parquet'
+
+        values_list = text.split(' ')
+        values_series = pl.Series(values_list)
+        df = values_series.to_frame(name="Values")
+        df.write_parquet(f"./cleared_files/{company_name}/{file_name_new}")
+
+def convert_files():
+    obj = get_object()
+    
+    for key in obj.keys():
+        for item in obj[key]:
+            convert_to_parquet(key, item)
