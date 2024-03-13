@@ -1,8 +1,7 @@
-import pandas as pd
+import polars as pl
 
-df = pd.read_html(r'C:\Users\310\Desktop\Progects_Py\raw_files\apple\aapl-20201226.htm')
+df = pl.read_parquet(r'C:\Users\310\Desktop\Progects_Py\cleared_files\apple\apple_texts.parquet')
 
-#print(df)
+print(df.select(pl.col("text_26")))
 
-#df[0].info()
-df[0].iloc[:1]
+

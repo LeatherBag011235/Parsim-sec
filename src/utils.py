@@ -161,37 +161,49 @@ def convert_to_txt(company_name, file_name):
         with open(f"./cleared_files/{company_name}/{file_name_new}", "w", encoding="utf-8") as f:
                 f.write(text)
 
-def convert_to_parquet(company_name, file_name):
-    with open(file_name) as file:
+def process_text(file_name):
+    with open(file_name, 'r', encoding='utf-8') as file:
         soup = bs(file, 'html.parser')
         divs = soup.find_all('div')
         text = ''
         
         for div in divs:
             text += div.text
-            
+        
+        # Clean the text
         text = re.sub(r'[^a-zA-Z0-9 ]', '', text)
         text = re.sub(r'\b\S*?\d\S*\b', '', text)
         text = re.sub(r'\s+', ' ', text)
         text = text.strip()
+    
+    return text
 
-        if not os.path.exists('./cleared_files'):
-            os.makedirs('./cleared_files')
+def save_to_parquet(company_name, texts):
+    # Create a DataFrame where each text becomes a column
+    # Each element in 'texts' is a single string (entire text from one document)
+    # We will create a dictionary where keys are column names and values are the texts
+    column_data = {f"text_{i}": [texts[i]] for i in range(len(texts))}
+    df = pl.DataFrame(column_data)
+    
+    # Determine the output directory and file name
+    output_dir = os.path.join('.', 'cleared_files', company_name)
+    os.makedirs(output_dir, exist_ok=True)
+    
+    file_name_new = f"{company_name}_texts.parquet"
+    full_path = os.path.join(output_dir, file_name_new)
+    full_path = os.path.normpath(full_path)
+    
+    print(f"Attempting to write to: {full_path}")
+    
+    # Write the DataFrame to Parquet
+    df.write_parquet(full_path)
 
-        if not os.path.exists(f'./cleared_files/{company_name}'):
-            os.makedirs(f'./cleared_files/{company_name}')
-        
-        file_name_new = file_name.split('/')[-1]
-        file_name_new = file_name_new.split('.')[0] + '.parquet'
-
-        values_list = text.split(' ')
-        values_series = pl.Series(values_list)
-        df = values_series.to_frame(name="Values")
-        df.write_parquet(f"./cleared_files/{company_name}/{file_name_new}")
 
 def convert_files():
     obj = get_object()
     
-    for key in obj.keys():
-        for item in obj[key]:
-            convert_to_parquet(key, item)
+    for key, items in obj.items():
+        texts = [process_text(item) for item in items]
+        print(len(texts))
+        save_to_parquet(key, texts)
+
