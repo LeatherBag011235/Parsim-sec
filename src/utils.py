@@ -17,7 +17,7 @@ def createDriver():
     return driver
 
 def getUrl(name):
-    urlPath = f'https://www.sec.gov/edgar/search/#/category=custom&ciks=0000320193&entityName={name}&forms=10-Q'
+    urlPath = f'https://www.sec.gov/edgar/search/#/category=custom&entityName={name}&forms=10-Q'
     return urlPath
 
 def open_first_page(driver, urlPath):
@@ -82,7 +82,9 @@ def get_company_links(driver, company_name):
     first_page_links = getAllModalButtonsOnPage(driver)
 #    pages_links = go_throw_pages(driver)
     result = first_page_links #+ pages_links
+    print(result)
     company_name = '_'.join(company_name.split('%2520')).lower()
+    print(company_name)
     company_links_object[company_name] = result
     
 
