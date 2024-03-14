@@ -37,7 +37,34 @@ def open_first_page(driver, urlPath):
 
 #def switch_page(driver, switch_button):
 #    WebDriverWait(driver, 20).until(EC.element_to_be_clickable(switch_button)).click()
+
+def get_all_rows(driver):
+    WebDriverWait(driver, 10).until(
+        EC.invisibility_of_element_located((By.CLASS_NAME, "searching-overlay"))
+    )
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "preview-file"))
+    )
+    
+    rows = []
+    trList  = driver.find_elements(By.CSS_SELECTOR, '#results #hits .table tbody tr')
+    
+    for tr in trList:        
+        page_link = tr.find_element(By.CSS_SELECTOR, 'td.filetype a')
+        filed_date = tr.find_element(By.CSS_SELECTOR, 'td.filed').get_attribute('innerText')
+        reporting_for = tr.find_element(By.CSS_SELECTOR, 'td.enddate').get_attribute('innerText')
         
+        raw_link_data = {
+            'page_link': page_link,
+            'filed_date': filed_date,
+            'reporting_for': reporting_for,
+        }
+        
+        rows.append(raw_link_data)
+    
+    return rows
+    
+
 def getAllModalButtonsOnPage(driver):
     WebDriverWait(driver, 10).until(
         EC.invisibility_of_element_located((By.CLASS_NAME, "searching-overlay"))
@@ -94,7 +121,7 @@ def parse_all_links(driver):
 
 def download_file(company_name, url):
     headers = {
-        'User-Agent': 'Your User-Agent String Here'
+        'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_15) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.5392.175 Safari/537.36'
     }
 
     with requests.Session() as session:
