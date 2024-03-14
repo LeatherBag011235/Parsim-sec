@@ -8,6 +8,7 @@ from consts import COMPANY_NAME_LIST
 import requests
 from bs4 import BeautifulSoup as bs
 import polars as pl
+import numpy as np 
 
 company_links_object = {}
 
@@ -16,26 +17,26 @@ def createDriver():
     return driver
 
 def getUrl(name):
-    urlPath = f'https://www.sec.gov/edgar/search/#/category=form-cat1&entityName={name}'
+    urlPath = f'https://www.sec.gov/edgar/search/#/category=custom&ciks=0000320193&entityName={name}&forms=10-Q'
     return urlPath
 
-def open_firt_page(driver, urlPath):
+def open_first_page(driver, urlPath):
     driver.get(urlPath)
 
-def check_if_switch_page_is_possible(driver):
-    WebDriverWait(driver, 10).until(
-        EC.invisibility_of_element_located((By.CLASS_NAME, "searching-overlay"))
-    )
-    next_page_button_container = driver.find_element(By.CSS_SELECTOR, ".pagination li:last-child")
+#def check_if_switch_page_is_possible(driver):
+#    WebDriverWait(driver, 10).until(
+#        EC.invisibility_of_element_located((By.CLASS_NAME, "searching-overlay"))
+#    )
+#    next_page_button_container = driver.find_element(By.CSS_SELECTOR, ".pagination li:last-child")
+#
+#    if 'disabled' in next_page_button_container.get_attribute('class'): 
+#        return False, False
+#    
+#    next_page_button = driver.find_element(By.CSS_SELECTOR, "a[data-value='nextPage']")
+#    return 'disabled' not in next_page_button.get_attribute('class').split(), next_page_button
 
-    if 'disabled' in next_page_button_container.get_attribute('class'): 
-        return False, False
-    
-    next_page_button = driver.find_element(By.CSS_SELECTOR, "a[data-value='nextPage']")
-    return 'disabled' not in next_page_button.get_attribute('class').split(), next_page_button
-
-def switch_page(driver, switch_button):
-    WebDriverWait(driver, 20).until(EC.element_to_be_clickable(switch_button)).click()
+#def switch_page(driver, switch_button):
+#    WebDriverWait(driver, 20).until(EC.element_to_be_clickable(switch_button)).click()
         
 def getAllModalButtonsOnPage(driver):
     WebDriverWait(driver, 10).until(
@@ -63,8 +64,8 @@ def getDocumentLink(driver, open_modal_button):
     close_modal_button.click()
     return link_to_the_file
 
-def go_throw_pages(driver):
-    is_page_switch_possible, next_page_button = check_if_switch_page_is_possible(driver)
+#def go_throw_pages(driver):
+#    is_page_switch_possible, next_page_button = check_if_switch_page_is_possible(driver)
 
     pages_links = []
 
@@ -77,12 +78,13 @@ def go_throw_pages(driver):
 
 def get_company_links(driver, company_name):
     urlPath = getUrl(company_name)
-    open_firt_page(driver, urlPath)
+    open_first_page(driver, urlPath)
     first_page_links = getAllModalButtonsOnPage(driver)
-    pages_links = go_throw_pages(driver)
-    result = first_page_links + pages_links
+#    pages_links = go_throw_pages(driver)
+    result = first_page_links #+ pages_links
     company_name = '_'.join(company_name.split('%2520')).lower()
     company_links_object[company_name] = result
+    
 
 def parse_all_links(driver):
     for company_name in COMPANY_NAME_LIST:
@@ -179,31 +181,38 @@ def process_text(file_name):
     return text
 
 def save_to_parquet(company_name, texts):
-    # Create a DataFrame where each text becomes a column
-    # Each element in 'texts' is a single string (entire text from one document)
-    # We will create a dictionary where keys are column names and values are the texts
-    column_data = {f"text_{i}": [texts[i]] for i in range(len(texts))}
-    df = pl.DataFrame(column_data)
-    
+    padded_lists_of_lists = make_texts_same_len(texts)
+
+    df = pl.DataFrame()
+
+    list_of_series = [pl.Series(f'report_{i+1}', sub_list) for i, sub_list in enumerate(padded_lists_of_lists)]
+    df = pl.DataFrame({}).hstack(list_of_series)
+
     # Determine the output directory and file name
-    output_dir = os.path.join('.', 'cleared_files', company_name)
+    output_dir = os.path.join('.', 'cleared_files')
     os.makedirs(output_dir, exist_ok=True)
-    
-    file_name_new = f"{company_name}_texts.parquet"
+
+    file_name_new = f"{company_name}_reports.parquet"
     full_path = os.path.join(output_dir, file_name_new)
     full_path = os.path.normpath(full_path)
-    
+
     print(f"Attempting to write to: {full_path}")
-    
+
     # Write the DataFrame to Parquet
     df.write_parquet(full_path)
 
+    print(f"{full_path} created successfully")
+
+def make_texts_same_len(texts):
+    list_of_lists = [string.split() for string in texts]
+    max_length = max(len(sub_list) for sub_list in list_of_lists)
+    padded_lists_of_lists = [sub_list + [np.nan] * (max_length - len(sub_list)) for sub_list in list_of_lists]
+    return padded_lists_of_lists
 
 def convert_files():
     obj = get_object()
     
     for key, items in obj.items():
         texts = [process_text(item) for item in items]
-        print(len(texts))
         save_to_parquet(key, texts)
 
