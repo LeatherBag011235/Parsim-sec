@@ -1,13 +1,11 @@
 from utils import *
 
 def main():
-    driver = createDriver()
-    open_first_page(driver, 'https://www.sec.gov/edgar/search/#/category=custom&entityName=General%2520Motors%2520Co%2520(GM)%2520(CIK%25200001467858)&forms=10-Q')
-    get_all_rows(driver)
+    #driver = createDriver()
     #parse_all_links(driver)
-    #download_files()
+    #download_files_2()
+    convert_files()
     #get_object()
-    #convert_files()
-
+    #print(get_date('./raw_files/Apple%2520Inc.%2520(AAPL)%2520(CIK%25200000320193)/2020-05-01_2020-03-28'))
 if __name__ == '__main__':
     main()

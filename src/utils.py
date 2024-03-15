@@ -9,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 import polars as pl
 import numpy as np 
+import datetime
 
 company_links_object = {}
 
@@ -22,21 +23,6 @@ def getUrl(name):
 
 def open_first_page(driver, urlPath):
     driver.get(urlPath)
-
-#def check_if_switch_page_is_possible(driver):
-#    WebDriverWait(driver, 10).until(
-#        EC.invisibility_of_element_located((By.CLASS_NAME, "searching-overlay"))
-#    )
-#    next_page_button_container = driver.find_element(By.CSS_SELECTOR, ".pagination li:last-child")
-#
-#    if 'disabled' in next_page_button_container.get_attribute('class'): 
-#        return False, False
-#    
-#    next_page_button = driver.find_element(By.CSS_SELECTOR, "a[data-value='nextPage']")
-#    return 'disabled' not in next_page_button.get_attribute('class').split(), next_page_button
-
-#def switch_page(driver, switch_button):
-#    WebDriverWait(driver, 20).until(EC.element_to_be_clickable(switch_button)).click()
 
 def get_all_rows(driver):
     WebDriverWait(driver, 10).until(
@@ -109,16 +95,28 @@ def get_company_links(driver, company_name):
     first_page_links = getAllModalButtonsOnPage(driver)
 #    pages_links = go_throw_pages(driver)
     result = first_page_links #+ pages_links
-    print(result)
+    #print(result)
     company_name = '_'.join(company_name.split('%2520')).lower()
-    print(company_name)
+    #print(company_name)
     company_links_object[company_name] = result
+
+def get_company_links_2(driver, company_name):
+    urlPath = getUrl(company_name)
+    open_first_page(driver, urlPath)
+    links_and_dates = get_all_rows(driver)
     
+    for raw_link_object in links_and_dates:
+        open_modal_button = raw_link_object['page_link']
+        url = getDocumentLink(driver, open_modal_button)
+        raw_link_object['page_link'] = url
+    
+    company_links_object[company_name] = links_and_dates
 
 def parse_all_links(driver):
     for company_name in COMPANY_NAME_LIST:
-        get_company_links(driver, company_name)
-
+        get_company_links_2(driver, company_name)
+    print(company_links_object)
+    
 def download_file(company_name, url):
     headers = {
         'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_15) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.5392.175 Safari/537.36'
@@ -144,10 +142,40 @@ def download_file(company_name, url):
         else:
             print(f"Failed to download the page. Status code: {response.status_code}")
 
+def download_file_2(company_name, url, filed_date, reporting_for):
+    headers = {
+        'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_15) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.5392.175 Safari/537.36'
+    }
+
+    with requests.Session() as session:
+        response = session.get(url, headers=headers)
+
+        if response.status_code == 200:
+            page_content = response.text
+            file_name = f'{filed_date}_{reporting_for}' 
+
+            if not os.path.exists('./raw_files'):
+                os.makedirs('./raw_files')
+
+            if not os.path.exists(f'./raw_files/{company_name}'):
+                os.makedirs(f'./raw_files/{company_name}')
+
+            with open(f"./raw_files/{company_name}/{file_name}", "w", encoding="utf-8") as f:
+                f.write(page_content)
+
+            print(f"Page {company_name}/{file_name} downloaded successfully.")
+        else:
+            print(f"Failed to download the page. Status code: {response.status_code}")
+
 def download_files():
     for key in company_links_object.keys():
         for item in company_links_object[key]:
             download_file(key, item)
+
+def download_files_2():
+    for key in company_links_object.keys():
+        for item_obj in company_links_object[key]:
+            download_file_2(key, item_obj['page_link'], item_obj['filed_date'], item_obj['reporting_for'])
 
 def get_object():
     result_obj = {}
@@ -162,9 +190,15 @@ def get_object():
                 continue
             
             files_list = [os.path.join(root, name) for name in files]
+            files_list.sort(key = lambda file_link : get_date(file_link))
             result_obj[relative_dir] = files_list
 
     return result_obj
+
+def get_date(file_link):
+    date_string = file_link.split('/')[-1].split('_')[0]
+    date_list = date_string.split('-')
+    return datetime.datetime(int(date_list[0]), int(date_list[1]), int(date_list[2]))
 
 def convert_to_txt(company_name, file_name):
     with open(file_name) as file:
@@ -192,7 +226,7 @@ def convert_to_txt(company_name, file_name):
         with open(f"./cleared_files/{company_name}/{file_name_new}", "w", encoding="utf-8") as f:
                 f.write(text)
 
-def process_text(file_name):
+def process_text(company_name, file_name):
     with open(file_name, 'r', encoding='utf-8') as file:
         soup = bs(file, 'html.parser')
         divs = soup.find_all('div')
@@ -206,6 +240,11 @@ def process_text(file_name):
         text = re.sub(r'\b\S*?\d\S*\b', '', text)
         text = re.sub(r'\s+', ' ', text)
         text = text.strip()
+        
+        filed = file_name.split('/')[-1].split("_")[0]
+        reporting_for = file_name.split('/')[-1].split("_")[1]
+        
+        text = f'{company_name} {filed} {reporting_for}' + ' ' + text
     
     return text
 
@@ -242,6 +281,5 @@ def convert_files():
     obj = get_object()
     
     for key, items in obj.items():
-        texts = [process_text(item) for item in items]
+        texts = [process_text(key, item) for item in items]
         save_to_parquet(key, texts)
-
