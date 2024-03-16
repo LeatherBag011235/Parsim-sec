@@ -17,8 +17,17 @@ def createDriver():
     driver = webdriver.Firefox()
     return driver
 
+cik_re = re.compile(r'\(CIK%2520(\d+)\)')
+
+def extract_cik(name):
+    match = cik_re.search(name)
+    if match:
+        return match.group(1)
+    return None
+
 def getUrl(name):
-    urlPath = f'https://www.sec.gov/edgar/search/#/category=custom&entityName={name}&forms=10-Q'
+    cik = extract_cik(name)
+    urlPath = f'https://www.sec.gov/edgar/search/#/category=custom&ciks={cik}&entityName={name}&forms=10-Q'
     return urlPath
 
 def open_first_page(driver, urlPath):
