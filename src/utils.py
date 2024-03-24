@@ -11,6 +11,7 @@ import polars as pl
 import numpy as np 
 import datetime
 
+
 company_links_object = {}
 
 def createDriver():
@@ -205,9 +206,10 @@ def get_object():
     return result_obj
 
 def get_date(file_link):
-    date_string = file_link.split('/')[-1].split('_')[0]
-    date_list = date_string.split('-')
-    return datetime.datetime(int(date_list[0]), int(date_list[1]), int(date_list[2]))
+    date_pattern = r'\d{4}-\d{2}-\d{2}'
+    dates = re.findall(date_pattern, file_link)
+    date1 = datetime.datetime.strptime(dates[0], "%Y-%m-%d")
+    return date1
 
 def convert_to_txt(company_name, file_name):
     with open(file_name) as file:
