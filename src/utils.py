@@ -162,7 +162,7 @@ def download_file_2(company_name, url, filed_date, reporting_for):
         return headers
     
     with requests.Session() as session:
-        response = session.get(url, headers=get_random_headers())
+        #response = session.get(url, headers=get_random_headers())
 
         #if response.status_code == 200:
         attempts = 3
@@ -265,9 +265,14 @@ def process_text(company_name, file_name):
         text = re.sub(r'\s+', ' ', text)
         text = text.strip()
         
-        filed = file_name.split('/')[-1].split("_")[0]
-        reporting_for = file_name.split('/')[-1].split("_")[1]
-        
+
+        date_pattern = r'\d{4}-\d{2}-\d{2}'
+        dates = re.findall(date_pattern, file_name)
+        date1 = datetime.datetime.strptime(dates[0], "%Y-%m-%d")
+        filed = date1.strftime("%Y-%m-%d")
+        date2 = datetime.datetime.strptime(dates[1], "%Y-%m-%d")
+        reporting_for = date2.strftime("%Y-%m-%d")
+
         text = f'{company_name} {filed} {reporting_for}' + ' ' + text
     
     return text
@@ -277,7 +282,7 @@ def save_to_parquet(company_name, texts):
 
     df = pl.DataFrame()
 
-    list_of_series = [pl.Series(f'report_{i+1}', sub_list) for i, sub_list in enumerate(padded_lists_of_lists)]
+    list_of_series = [pl.Series(sub_list[1], sub_list) for i, sub_list in enumerate(padded_lists_of_lists)]
     df = pl.DataFrame({}).hstack(list_of_series)
 
     # Determine the output directory and file name
