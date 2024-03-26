@@ -4,12 +4,14 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from fake_useragent import UserAgent
 from consts import COMPANY_NAME_LIST
 import requests
 from bs4 import BeautifulSoup as bs
 import polars as pl
 import numpy as np 
 import datetime
+import time
 
 
 company_links_object = {}
@@ -153,27 +155,38 @@ def download_file(company_name, url):
             print(f"Failed to download the page. Status code: {response.status_code}")
 
 def download_file_2(company_name, url, filed_date, reporting_for):
-    headers = {
-        'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_15) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.5392.175 Safari/537.36'
-    }
-
+    
+    def get_random_headers():
+        ua = UserAgent()
+        headers = {'User-Agent': ua.random}
+        return headers
+    
     with requests.Session() as session:
-        response = session.get(url, headers=headers)
+        response = session.get(url, headers=get_random_headers())
 
-        if response.status_code == 200:
-            page_content = response.text
-            file_name = f'{filed_date}_{reporting_for}' 
+        #if response.status_code == 200:
+        attempts = 3
+        for attempt in range(attempts):
+            try:
+                response = session.get(url, headers=get_random_headers(), timeout=10)
 
-            if not os.path.exists('./raw_files'):
-                os.makedirs('./raw_files')
+                page_content = response.text
+                file_name = f'{filed_date}_{reporting_for}' 
 
-            if not os.path.exists(f'./raw_files/{company_name}'):
-                os.makedirs(f'./raw_files/{company_name}')
+                if not os.path.exists('./raw_files'):
+                    os.makedirs('./raw_files')
 
-            with open(f"./raw_files/{company_name}/{file_name}", "w", encoding="utf-8") as f:
-                f.write(page_content)
+                if not os.path.exists(f'./raw_files/{company_name}'):
+                    os.makedirs(f'./raw_files/{company_name}')
 
-            print(f"Page {company_name}/{file_name} downloaded successfully.")
+                with open(f"./raw_files/{company_name}/{file_name}", "w", encoding="utf-8") as f:
+                    f.write(page_content)
+
+                print(f"Page {company_name}/{file_name} downloaded successfully.")
+                break  
+            except requests.exceptions.ConnectTimeout:
+                print(f"Attempt {attempt + 1} of {attempts} failed; retrying after delay...")
+                time.sleep(3) 
         else:
             print(f"Failed to download the page. Status code: {response.status_code}")
 
