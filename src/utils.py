@@ -1,6 +1,7 @@
 import os
 import re
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -17,7 +18,9 @@ import time
 company_links_object = {}
 
 def createDriver():
-    driver = webdriver.Firefox()
+    options = Options()
+    options.headless = True
+    driver = webdriver.Chrome(options=options)
     return driver
 
 cik_re = re.compile(r'\(CIK%2520(\d+)\)')
