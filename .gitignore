@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 /raw_files
 /cleared_files
+Parsim-sec/src/Analysis/full_10_Q_scores
