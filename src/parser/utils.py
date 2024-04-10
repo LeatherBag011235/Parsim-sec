@@ -64,7 +64,7 @@ def get_all_rows(driver):
     return rows
 
 # Функция для открытия модального окна и сохранения ссылки на документ
-def getDocumentLink(driver, open_modal_button):
+def get_document_link(driver, open_modal_button):
     open_modal_button.click()
     link_to_the_file_element = driver.find_element(By.ID, "open-file")
     link_to_the_file = link_to_the_file_element.get_attribute('href')
@@ -80,7 +80,7 @@ def get_company_links(driver, company_links_object, company_name):
     
     for raw_link_object in links_and_dates:
         open_modal_button = raw_link_object['page_link']
-        url = getDocumentLink(driver, open_modal_button)
+        url = get_document_link(driver, open_modal_button)
         raw_link_object['page_link'] = url
     
     company_links_object[company_name] = links_and_dates
