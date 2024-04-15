@@ -33,7 +33,7 @@ def extract_cik(name):
 
 def getUrl(name):
     cik = extract_cik(name)
-    urlPath = f'https://www.sec.gov/edgar/search/#/category=custom&ciks={cik}&entityName={name}&forms=10-Q'
+    urlPath = f'https://www.sec.gov/edgar/search/#/category=custom&ciks={cik}&entityName={name}&forms=10-K%252C10-Q'
     return urlPath
 
 def open_first_page(driver, urlPath):
@@ -78,6 +78,7 @@ def getAllModalButtonsOnPage(driver):
     page_links = []
 
     for button in buttonList:
+        print()
         button_label_is_valid = button.get_attribute('innerText').split()[0] == '10-Q'
         if button_label_is_valid:
             page_links.append(getDocumentLink(driver, button))
@@ -91,18 +92,6 @@ def getDocumentLink(driver, open_modal_button):
     close_modal_button = driver.find_element(By.ID, "close-modal")
     close_modal_button.click()
     return link_to_the_file
-
-#def go_throw_pages(driver):
-#    is_page_switch_possible, next_page_button = check_if_switch_page_is_possible(driver)
-
-    pages_links = []
-
-    while is_page_switch_possible:
-        switch_page(driver, next_page_button)
-        pages_links = getAllModalButtonsOnPage(driver)
-        is_page_switch_possible, next_page_button = check_if_switch_page_is_possible(driver)
-    
-    return pages_links
 
 def get_company_links(driver, company_name):
     urlPath = getUrl(company_name)
@@ -130,32 +119,9 @@ def get_company_links_2(driver, company_name):
 def parse_all_links(driver):
     for company_name in COMPANY_NAME_LIST:
         get_company_links_2(driver, company_name)
-    print(company_links_object)
+    print(len(company_links_object))
     
-def download_file(company_name, url):
-    headers = {
-        'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_15) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.5392.175 Safari/537.36'
-    }
-
-    with requests.Session() as session:
-        response = session.get(url, headers=headers)
-
-        if response.status_code == 200:
-            page_content = response.text
-            file_name = url.split('/')[-1]
-
-            if not os.path.exists('./raw_files'):
-                os.makedirs('./raw_files')
-
-            if not os.path.exists(f'./raw_files/{company_name}'):
-                os.makedirs(f'./raw_files/{company_name}')
-
-            with open(f"./raw_files/{company_name}/{file_name}", "w", encoding="utf-8") as f:
-                f.write(page_content)
-
-            print(f"Page {company_name}/{file_name} downloaded successfully.")
-        else:
-            print(f"Failed to download the page. Status code: {response.status_code}")
+    
 
 def download_file_2(company_name, url, filed_date, reporting_for):
     
@@ -193,10 +159,6 @@ def download_file_2(company_name, url, filed_date, reporting_for):
         else:
             print(f"Failed to download the page. Status code: {response.status_code}")
 
-def download_files():
-    for key in company_links_object.keys():
-        for item in company_links_object[key]:
-            download_file(key, item)
 
 def download_files_2():
     for key in company_links_object.keys():
