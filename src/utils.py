@@ -65,26 +65,26 @@ def get_all_rows(driver):
     
     return rows
     
-
-def getAllModalButtonsOnPage(driver):
-    WebDriverWait(driver, 10).until(
-        EC.invisibility_of_element_located((By.CLASS_NAME, "searching-overlay"))
-    )
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "preview-file"))
-    )
-    buttonList = driver.find_elements(By.CLASS_NAME, "preview-file")
-
-    page_links = []
-
-    for button in buttonList:
-        print()
-        button_label_is_valid = button.get_attribute('innerText').split()[0] == '10-Q'
-        if button_label_is_valid:
-            page_links.append(getDocumentLink(driver, button))
-    
-    return page_links
-
+#
+#def getAllModalButtonsOnPage(driver):
+#    WebDriverWait(driver, 10).until(
+#        EC.invisibility_of_element_located((By.CLASS_NAME, "searching-overlay"))
+#    )
+#    WebDriverWait(driver, 10).until(
+#        EC.presence_of_element_located((By.CLASS_NAME, "preview-file"))
+#    )
+#    buttonList = driver.find_elements(By.CLASS_NAME, "preview-file")
+#
+#    page_links = []
+#
+#    for button in buttonList:
+#        print(f'button list {button}')
+#        button_label_is_valid = button.get_attribute('innerText').split()[0] == '10-Q'
+#        if button_label_is_valid:
+#            page_links.append(getDocumentLink(driver, button))
+#    
+#    return page_links
+#
 def getDocumentLink(driver, open_modal_button):
     open_modal_button.click()
     link_to_the_file_element = driver.find_element(By.ID, "open-file")
@@ -93,16 +93,16 @@ def getDocumentLink(driver, open_modal_button):
     close_modal_button.click()
     return link_to_the_file
 
-def get_company_links(driver, company_name):
-    urlPath = getUrl(company_name)
-    open_first_page(driver, urlPath)
-    first_page_links = getAllModalButtonsOnPage(driver)
-#    pages_links = go_throw_pages(driver)
-    result = first_page_links #+ pages_links
-    #print(result)
-    company_name = '_'.join(company_name.split('%2520')).lower()
-    #print(company_name)
-    company_links_object[company_name] = result
+#def get_company_links(driver, company_name):
+#    urlPath = getUrl(company_name)
+#    open_first_page(driver, urlPath)
+#    first_page_links = getAllModalButtonsOnPage(driver)
+##    pages_links = go_throw_pages(driver)
+#    result = first_page_links #+ pages_links
+#    #print(result)
+#    company_name = '_'.join(company_name.split('%2520')).lower()
+#    #print(company_name)
+#    company_links_object[company_name] = result
 
 def get_company_links_2(driver, company_name):
     urlPath = getUrl(company_name)
@@ -119,7 +119,7 @@ def get_company_links_2(driver, company_name):
 def parse_all_links(driver):
     for company_name in COMPANY_NAME_LIST:
         get_company_links_2(driver, company_name)
-    print(len(company_links_object))
+    print(f'should be amount of reports: {len(company_links_object["Apple%2520Inc.%2520(AAPL)%2520(CIK%25200000320193)"])}')
     
     
 
