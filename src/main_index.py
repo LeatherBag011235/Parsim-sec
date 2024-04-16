@@ -1,11 +1,11 @@
 import time
 import sys
 
-sys.path.append('/Users/dmitry/Documents/Projects/Parsim-sec')
+#sys.path.append('/Users/dmitry/Documents/Projects/Parsim-sec')
 
-from src.parser.index import get_company_links_object
-from src.downloader.index import download_files
-from src.converter.index import convert_files
+from parser.index import get_company_links_object
+from downloader.index import download_files
+from converter.index import convert_files
 
 start_time = time.time()
 

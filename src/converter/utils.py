@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup as bs
 import polars as pl
 import numpy as np 
 import datetime
-from consts import DATE_REGEX
+from .consts import DATE_REGEX
 
 # проходит по папкам в ./raw_files и собирает названия файлов из этих папок в словарь
 def get_date(file_link):

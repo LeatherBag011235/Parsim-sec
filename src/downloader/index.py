@@ -1,4 +1,4 @@
-from utils import download_file
+from .utils import *
 
 def download_files(company_links_object):
     for key in company_links_object.keys():

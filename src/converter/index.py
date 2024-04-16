@@ -1,4 +1,4 @@
-from utils import *
+from .utils import *
 
 def convert_files():
     obj = get_object()

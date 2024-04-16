@@ -19,15 +19,17 @@ def download_report(cik, year, qtr, report_type):
     
     # Fetch the master index file
     response = requests.get(index_url, headers=get_random_headers())
-    print(response)
     lines = response.text.splitlines()
   
 
     for line in lines:
         parts = line.split('|')
-        print(parts)
-        if len(parts) > 4:
-            form_type, company_cik, date_filed, filename = parts[2], parts[0], parts[3], parts[4]
+
+        
+        if (len(parts) > 4):
+            print(parts)
+            print(parts[3], parts[4])
+            form_type, company_cik, date_filed, filename = parts[2], parts[4], parts[3], parts[4]
             if company_cik == cik and form_type in report_type:
                 # Construct the URL to download the report
                 report_url = f"https://www.sec.gov/Archives/{filename}"
