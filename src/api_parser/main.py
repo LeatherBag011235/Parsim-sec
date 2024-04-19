@@ -1,13 +1,25 @@
 import re
 from bs4 import BeautifulSoup
+from sec_downloader import Downloader
+import sec_parser as sp
 
 HEADER_FIRST = "Management’s Discussion"
 HEADER_SECOND = "Quantitative and Qualitative"
 
+def get_html(ticker, form):
+    
+    dl = Downloader("MyCompanyName", "email@example.com")
+    html = dl.get_filing_html(ticker=ticker, form=form)
+
+    return html
+#get_html("AAPL", "10-Q")
+
 def get_internal_links():    
-    with open ('/Users/dmitry/Documents/Projects/parser_project/raw_files/Apple%2520Inc.%2520(AAPL)%2520(CIK%25200000320193)/2023-08-04_2023-07-01') as fileX:        
-        text = fileX.read()
-        soup = BeautifulSoup(text, 'html.parser')
+    #with open ('/Users/dmitry/Documents/Projects/parser_project/raw_files/Apple%2520Inc.%2520(AAPL)%2520(CIK%25200000320193)/2023-08-04_2023-07-01') as fileX:        
+        #text = fileX.read()
+        
+        soup = BeautifulSoup(get_html("AAPL", "10-Q"), 'html.parser')
+        
         
         links = soup.find_all('a', href=lambda x: x and x.startswith('#'))
         headers_list = []
@@ -35,7 +47,7 @@ def get_internal_links():
                 print('next_element_with_text 2 is None')
 
         text_between_headers = ""
-        current_element = header_first
+        current_element = header_first        
         while current_element != header_second:
             text_between_headers += current_element.get_text(strip=True) + "\n"
             current_element = current_element.find_next_sibling()
