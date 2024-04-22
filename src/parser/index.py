@@ -1,5 +1,3 @@
-import sys
-sys.path.append('/Users/dmitry/Documents/Projects/Parsim-sec/src/parser')
 
 from .utils import create_driver, parse_all_links
 
