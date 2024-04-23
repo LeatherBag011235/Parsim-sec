@@ -139,4 +139,4 @@ def anilise_all_raw_files():
     print(f'Failed: {failed_general / all_documents_count}')
 
 #anilise_all_raw_files()
-print(get_internal_links('/Users/dmitry/Documents/Projects/parser_project/raw_files/GENERAL%252CELECTRIC%2520CO%2520(GE)%2520(CIK%25200000040545)/2019-04-30_2019-03-31'))
+print(get_internal_links('/Users/dmitry/Documents/Projects/parser_project/raw_files/EXXON%2520MOBIL%2520CORP%2520(XOM)%2520(CIK%25200000034088)/2019-05-02_2019-03-31'))
