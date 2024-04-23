@@ -49,6 +49,9 @@ def text_preprocessing(soup):
 pattern_mnda = r"(?i)item\s+\d+[A-Za-z]?\.?\s*(?:--|[-—])?\s*management[’'`]s\s+discussion\s+and\s+analysis\s+of\s+financial\s+condition\s+and\s+results\s+of\s+operations"
 pattern_qnq = r"(?i)item\s+\d+[A-Za-z]?\.?\s*(?:--|[-—])?\s*quantitative\s+and\s+qualitative\s+disclosures\s+about\s+market\s+risk"
 
+#accounting for either order patterns
+#pattern_mnda = r"(?i)item\s+\d+[A-Za-z]?\.?\s*(?:--|[-—])?\s*management[’'`]s\s+discussion\s+and\s+analysis\s+of\s+(?:financial\s+condition\s+and\s+results\s+of\s+operations|results\s+of\s+operations\s+and\s+financial\s+condition)"
+#pattern_qnq = r"(?i)item\s+\d+[A-Za-z]?\.?\s*(?:--|[-—])?\s*(?:quantitative\s+and\s+qualitative|qualitative\s+and\s+quantitative)?\s+disclosures\s+about\s+market\s+risk"
 
 def check_for_finding_titles(text, company_name, url):
 
@@ -83,3 +86,38 @@ def find_longest_substring(text):
     
     return longest_substring, len(longest_substring)
 
+
+#def make_texts_same_len(company_dict): 
+
+    max_length = max(len(lst) for lst in company_dict.values())
+
+    for key in company_dict:
+        additional_length = max_length - len(company_dict[key])
+        company_dict[key] = company_dict[key] + [np.nan] * additional_length
+
+    return company_dict
+
+def clean_text(text):
+    
+    text = re.sub(r'[^a-zA-Z0-9 ]', '', text)
+    text = re.sub(r'\b\S*?\d\S*\b', '', text)
+    text = re.sub(r'\s+', ' ', text)
+    text = text.strip()
+
+    return text 
+
+def save_file(text, company_name, filed_date):
+                
+                
+    file_name = f'{filed_date}' 
+
+    if not os.path.exists('./cleared_strings'):
+        os.makedirs('./cleared_strings')
+
+    if not os.path.exists(f'./cleared_strings/{company_name}'):
+        os.makedirs(f'./cleared_strings/{company_name}')
+
+    with open(f"./cleared_strings/{company_name}/{file_name}", "w", encoding="utf-8") as f:
+        f.write(text)
+
+    print(f"Page {company_name}/{file_name} saved successfully.")
