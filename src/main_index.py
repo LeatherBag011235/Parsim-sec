@@ -4,7 +4,8 @@ import sys
 #sys.path.append('/Users/dmitry/Documents/Projects/Parsim-sec')
 
 from parser.index import get_company_links_object
-from downloader.index import download_files
+#from downloader.index import download_files
+from downloader_regex.index_whit_regex import download_files 
 from converter.index import convert_files
 
 start_time = time.time()
@@ -12,7 +13,8 @@ start_time = time.time()
 def main():
     company_links_object = get_company_links_object()
     download_files(company_links_object)
-    convert_files()
+
+    #convert_files()
     
 if __name__ == '__main__':
     main()
