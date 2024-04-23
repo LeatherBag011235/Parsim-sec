@@ -29,7 +29,7 @@ def extract_cik(name):
 # Функция для получения URL
 def get_url(name):
     cik = extract_cik(name)
-    urlPath = f'https://www.sec.gov/edgar/search/#/category=custom&ciks={cik}&entityName={name}&forms=10-Q'
+    urlPath = f'https://www.sec.gov/edgar/search/#/category=custom&ciks={cik}&entityName={name}&forms=10-K%252C10-Q'
     return urlPath
 
 # Функция для открытия страницы

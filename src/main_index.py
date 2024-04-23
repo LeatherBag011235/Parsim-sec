@@ -1,7 +1,4 @@
 import time
-import sys
-
-#sys.path.append('/Users/dmitry/Documents/Projects/Parsim-sec')
 
 from parser.index import get_company_links_object
 #from downloader.index import download_files
