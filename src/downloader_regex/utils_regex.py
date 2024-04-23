@@ -87,16 +87,6 @@ def find_longest_substring(text):
     return longest_substring, len(longest_substring)
 
 
-#def make_texts_same_len(company_dict): 
-
-    max_length = max(len(lst) for lst in company_dict.values())
-
-    for key in company_dict:
-        additional_length = max_length - len(company_dict[key])
-        company_dict[key] = company_dict[key] + [np.nan] * additional_length
-
-    return company_dict
-
 def clean_text(text):
     
     text = re.sub(r'[^a-zA-Z0-9 ]', '', text)
