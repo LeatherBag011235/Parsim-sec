@@ -20,7 +20,7 @@ def f7(seq):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 def get_internal_links():    
-    with open ('/Users/dmitry/Documents/Projects/parser_project/raw_files/Apple%2520Inc.%2520(AAPL)%2520(CIK%25200000320193)/2023-08-04_2023-07-01') as fileX:        
+    with open ('/Users/dmitry/Documents/Projects/parser_project/raw_files/JPMORGAN%2520CHASE%2520(CIK%25200000019617)/2019-05-02_2019-03-31') as fileX:        
         text = fileX.read()
         
         #soup = BeautifulSoup(get_html("AAPL", "10-Q"), 'html.parser')
@@ -31,6 +31,8 @@ def get_internal_links():
         
         for link in links:
             tr = link.find_parent('tr')
+            if tr == None:
+                continue
             tr_text = tr.get_text()
             
             if(HEADER_FIRST in tr_text or HEADER_SECOND in tr_text):
@@ -57,12 +59,27 @@ def get_internal_links():
                 print('next_element_with_text 2 is None')
 
         text_between_headers = ""
-        current_element = header_first        
-        while current_element != header_second:
+        current_element = header_first    
+        
+        #print('\n')
+        #next_element = current_element.find_next_sibling()
+        #if next_element == None:
+        #    next_element = current_element.parent.find_next_sibling()
+        #print(next_element, current_element)
+        #print('\n')    
+        
+        for noscript in soup.find_all('noscript'):
+            noscript.decompose()
+        
+        while current_element.get_text() != header_second.get_text():
+            #print('\n\n')
+            #print('current_element: ', current_element, '\n', 'header_second: ', header_second)
+            #print('\n\n')
+            #print(current_element)
             should_skip = False
             if current_element.name == 'table':
                 #print('SKIPED!!!')
-                continue
+                should_skip = True
             first_tag_child = None
             for child in current_element.contents:
                 if isinstance(child, Tag):
@@ -74,13 +91,18 @@ def get_internal_links():
             if should_skip == False:
                 text_between_headers += current_element.get_text(strip=True) + "\n"
                 #print('basic...')
-            current_element = current_element.find_next_sibling()
+            next_element = current_element.find_next_sibling()
+            if next_element == None:
+                current_element = current_element.parent.find_next_sibling()
+            else:
+                current_element = current_element.find_next_sibling()
             #print('\n')
             
         text_between_headers = text_between_headers.replace('\t', '').strip()
         text_between_headers = text_between_headers.replace('\n', '').strip()
         text_between_headers = re.sub(r'[^a-zA-Z\s]', '', re.sub(r'\d+', '', text_between_headers))
         text_between_headers = re.sub(' {1,}', ' ', text_between_headers)
+        
         print(text_between_headers)
          
 get_internal_links()     
