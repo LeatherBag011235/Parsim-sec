@@ -7,7 +7,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from fake_useragent import UserAgent
-from consts import COMPANY_NAME_LIST
 import requests
 import polars as pl
 import numpy as np 
@@ -44,9 +43,12 @@ def text_preprocessing(soup):
     text = soup.get_text()
     text = unidecode.unidecode(text)
     text = re.sub(r'\s+', ' ', text).strip()
+    return text
 
-pattern_mnda = r"(?i)item\s+\d+[A-Za-z]?\.?\.\s+management[’'`]s\s+Discussion\s+and\s+Analysis\s+of\s+Financial\s+Condition\s+and\s+Results\s+of\s+Operations"
-pattern_qnq = r"(?i)item\s+\d+[A-Za-z]?\.?\s+quantitative\s+and\s+qualitative\s+disclosures\s+about\s+market\s+risk"
+
+pattern_mnda = r"(?i)item\s+\d+[A-Za-z]?\.?\s*(?:--|[-—])?\s*management[’'`]s\s+discussion\s+and\s+analysis\s+of\s+financial\s+condition\s+and\s+results\s+of\s+operations"
+pattern_qnq = r"(?i)item\s+\d+[A-Za-z]?\.?\s*(?:--|[-—])?\s*quantitative\s+and\s+qualitative\s+disclosures\s+about\s+market\s+risk"
+
 
 def check_for_finding_titles(text, company_name, url):
 
@@ -56,7 +58,9 @@ def check_for_finding_titles(text, company_name, url):
     if (len(matches_mnda) > 0) & (len(matches_qnq) > 0 ):
         return True
     else:
-        print(f'fail to find both titles in {company_name} url: {url}')
+        print('\n')
+        print(f' !!! Fail to find both titles in {company_name} url: {url}')
+        print('\n')
         return False
 
 
