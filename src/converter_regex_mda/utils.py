@@ -48,6 +48,7 @@ def extract_strings():
 def save_to_parquet(company_name, company_dict):
 
     df = pl.DataFrame(company_dict)
+    #print(df)
 
     # Determine the output directory and file name
     output_dir = os.path.join('.', 'polars_dfs')

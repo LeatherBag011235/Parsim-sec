@@ -4,7 +4,7 @@ from parser.index import get_company_links_object
 #from downloader.index import download_files
 from downloader_regex.index_whit_regex import download_files 
 #from converter.index import convert_files
-from converter_regex.index import convert_files
+from converter_regex_mda.index import convert_files
 
 start_time = time.time()
 
