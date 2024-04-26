@@ -1,6 +1,16 @@
 import os
-import polars as pl
 import numpy as np 
+import re
+import polars as pl
+
+
+def spesify_dir(files_to_convert):
+    #spesify directory to get files for converting
+    output_dir_for_get = os.path.join('raw_data', files_to_convert)
+
+    #spesify directory to save converted files 
+    output_dir_for_save = os.path.join('prepared_data', files_to_convert)
+    return output_dir_for_get, output_dir_for_save
 
 
 def make_texts_same_len(company_dict): 
@@ -14,9 +24,7 @@ def make_texts_same_len(company_dict):
     return company_dict
 
 
-def extract_strings():
-
-    base_directory = 'cleared_strings'
+def extract_strings(base_directory):
 
     # Dictionary to hold processed data for each company
     dict_with_all_companies = {}
@@ -45,13 +53,17 @@ def extract_strings():
 
             
 
-def save_to_parquet(company_name, company_dict):
+def save_to_parquet(company_name, company_dict, base_directory):
+
+    match = re.search(r'\\([^\\]*)$', base_directory)
+
+    drectory_name = match.group(1) if match else None
 
     df = pl.DataFrame(company_dict)
     #print(df)
 
     # Determine the output directory and file name
-    output_dir = os.path.join('.', 'polars_dfs')
+    output_dir = os.path.join('prepared_data', drectory_name)
     os.makedirs(output_dir, exist_ok=True)
 
     file_name_new = f"{company_name}_reports.parquet"

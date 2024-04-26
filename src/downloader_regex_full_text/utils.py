@@ -1,10 +1,8 @@
 import os
 import re
 from bs4 import BeautifulSoup
-from selenium.webdriver.support import expected_conditions as EC
 from fake_useragent import UserAgent
 import requests
-
 import time
 import unidecode
 
@@ -59,13 +57,13 @@ def save_file(text, company_name, filed_date):
                 
     file_name = f'{filed_date}' 
 
-    if not os.path.exists('./full_10Q_10K_without_tabels'):
-        os.makedirs('./full_10Q_10K_without_tabels')
+    if not os.path.exists('./raw_data./full_10Q_10K_without_tabels'):
+        os.makedirs('./raw_data./full_10Q_10K_without_tabels')
 
-    if not os.path.exists(f'./full_10Q_10K_without_tabels/{company_name}'):
-        os.makedirs(f'./full_10Q_10K_without_tabels/{company_name}')
+    if not os.path.exists(f'./raw_data./full_10Q_10K_without_tabels/{company_name}'):
+        os.makedirs(f'./raw_data./full_10Q_10K_without_tabels/{company_name}')
 
-    with open(f"./full_10Q_10K_without_tabels/{company_name}/{file_name}", "w", encoding="utf-8") as f:
+    with open(f"./raw_data./full_10Q_10K_without_tabels/{company_name}/{file_name}", "w", encoding="utf-8") as f:
         f.write(text)
 
     print(f"Page {company_name}/{file_name} saved successfully.")

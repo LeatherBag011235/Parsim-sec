@@ -1,16 +1,8 @@
 import os
 import re
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from fake_useragent import UserAgent
 import requests
-import polars as pl
-import numpy as np 
-import datetime
 import time
 import unidecode
 
@@ -84,7 +76,7 @@ def find_longest_substring(text):
                     longest_substring = substring
                 break  
     
-    return longest_substring, len(longest_substring)
+    return longest_substring
 
 
 def clean_text(text):
@@ -101,13 +93,13 @@ def save_file(text, company_name, filed_date):
                 
     file_name = f'{filed_date}' 
 
-    if not os.path.exists('./cleared_strings'):
-        os.makedirs('./cleared_strings')
+    if not os.path.exists('./raw_data./cleared_strings'):
+        os.makedirs('./raw_data./cleared_strings')
 
-    if not os.path.exists(f'./cleared_strings/{company_name}'):
-        os.makedirs(f'./cleared_strings/{company_name}')
+    if not os.path.exists(f'./raw_data./cleared_strings/{company_name}'):
+        os.makedirs(f'./raw_data./cleared_strings/{company_name}')
 
-    with open(f"./cleared_strings/{company_name}/{file_name}", "w", encoding="utf-8") as f:
+    with open(f"./raw_data./cleared_strings/{company_name}/{file_name}", "w", encoding="utf-8") as f:
         f.write(text)
 
     print(f"Page {company_name}/{file_name} saved successfully.")

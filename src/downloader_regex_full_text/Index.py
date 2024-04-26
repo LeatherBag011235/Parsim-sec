@@ -22,7 +22,7 @@ def download_files(company_links_object):
 
             save_file(cleaned_mnda_text, key, item_obj['filed_date'])
             
-            len_list.append(text)
+            len_list.append(len(cleaned_mnda_text))
         
 
     print(f'Fails over all docs procesed: {fails/all_docs_procesed}')

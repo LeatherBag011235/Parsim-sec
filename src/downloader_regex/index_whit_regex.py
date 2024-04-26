@@ -20,13 +20,13 @@ def download_files(company_links_object):
                 fails += 1
                 continue
 
-            mnda_text, len_of_mnda_text = find_longest_substring(text)
+            mnda_text = find_longest_substring(text)
 
             cleaned_mnda_text = clean_text(mnda_text)
 
             save_file(cleaned_mnda_text, key, item_obj['filed_date'])
             
-            len_list.append(len_of_mnda_text)
+            len_list.append(len(cleaned_mnda_text))
         
 
     print(f'Fails over all docs procesed: {fails/all_docs_procesed}')
