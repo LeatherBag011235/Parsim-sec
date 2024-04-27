@@ -12,14 +12,16 @@ def get_date(file_link):
     date1 = datetime.datetime.strptime(dates[0], "%Y-%m-%d")
     return date1
 
-def get_object():
+
+
+def get_object(files_to_convert):
     result_obj = {}
 
-    for root, dirs, files in os.walk("./raw_files", topdown=False):
+    for root, dirs, files in os.walk(f"./raw_data./{files_to_convert}", topdown=False):
         files = [f for f in files if f != '.DS_Store']
         
         if files:
-            relative_dir = os.path.relpath(root, "./raw_files")
+            relative_dir = os.path.relpath(root, f"./raw_data./{files_to_convert}")
             
             if relative_dir == '.':
                 continue
@@ -63,7 +65,7 @@ def make_texts_same_len(texts):
     padded_lists_of_lists = [sub_list + [np.nan] * (max_length - len(sub_list)) for sub_list in list_of_lists]
     return padded_lists_of_lists
 
-def save_to_parquet(company_name, texts):
+def save_to_parquet(company_name, texts, files_to_convert):
     padded_lists_of_lists = make_texts_same_len(texts)
 
     df = pl.DataFrame()
@@ -72,7 +74,7 @@ def save_to_parquet(company_name, texts):
     df = pl.DataFrame({}).hstack(list_of_series)
 
     # Determine the output directory and file name
-    output_dir = os.path.join('.', 'cleared_files')
+    output_dir = os.path.join('prepared_data', files_to_convert)
     os.makedirs(output_dir, exist_ok=True)
 
     file_name_new = f"{company_name}_reports.parquet"
