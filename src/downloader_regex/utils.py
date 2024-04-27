@@ -93,13 +93,13 @@ def save_file(text, company_name, filed_date):
                 
     file_name = f'{filed_date}' 
 
-    if not os.path.exists('./raw_data./cleared_strings'):
-        os.makedirs('./raw_data./cleared_strings')
+    if not os.path.exists('./raw_data./mdna_part_regex'):
+        os.makedirs('./raw_data./mdna_part_regex')
 
-    if not os.path.exists(f'./raw_data./cleared_strings/{company_name}'):
-        os.makedirs(f'./raw_data./cleared_strings/{company_name}')
+    if not os.path.exists(f'./raw_data./mdna_part_regex/{company_name}'):
+        os.makedirs(f'./raw_data./mdna_part_regex/{company_name}')
 
-    with open(f"./raw_data./cleared_strings/{company_name}/{file_name}", "w", encoding="utf-8") as f:
+    with open(f"./raw_data./mdna_part_regex/{company_name}/{file_name}", "w", encoding="utf-8") as f:
         f.write(text)
 
     print(f"Page {company_name}/{file_name} saved successfully.")

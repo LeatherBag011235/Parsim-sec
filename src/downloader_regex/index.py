@@ -1,4 +1,4 @@
-from .utils_regex import *
+from .utils import *
 
 
 def download_files(company_links_object):

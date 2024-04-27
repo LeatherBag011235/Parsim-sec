@@ -18,13 +18,13 @@ def download_file(company_name, url, filed_date, reporting_for):
                 page_content = response.text
                 file_name = f'{filed_date}_{reporting_for}' 
 
-                if not os.path.exists('./raw_data./raw_files'):
+                if not os.path.exists('./raw_data./full_doc_dirty'):
                     os.makedirs('./raw_data./raw_files')
 
-                if not os.path.exists(f'./raw_data./raw_files/{company_name}'):
-                    os.makedirs(f'./raw_data./raw_files/{company_name}')
+                if not os.path.exists(f'./raw_data./full_doc_dirty/{company_name}'):
+                    os.makedirs(f'./raw_data./full_doc_dirty/{company_name}')
 
-                with open(f"./raw_data./raw_files/{company_name}/{file_name}", "w", encoding="utf-8") as f:
+                with open(f"./raw_data./full_doc_dirty/{company_name}/{file_name}", "w", encoding="utf-8") as f:
                     f.write(page_content)
 
                 print(f"Page {company_name}/{file_name} downloaded successfully.")
