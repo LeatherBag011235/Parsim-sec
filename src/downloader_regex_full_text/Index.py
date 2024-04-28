@@ -20,9 +20,14 @@ def download_files(company_links_object):
 
             cleaned_mnda_text = clean_text(text)
 
-            save_file(cleaned_mnda_text, key, item_obj['filed_date'])
-            
-            len_list.append(len(cleaned_mnda_text))
+
+            if len(cleaned_mnda_text) > 10000:
+
+                save_file(cleaned_mnda_text, key, item_obj['filed_date'])
+                len_list.append(len(cleaned_mnda_text))
+
+            else:
+                print(f" \n {key} \n len of {item_obj['page_link']} less then 10000 characters, and it is not saved \n")  
         
 
     print(f'Fails over all docs procesed: {fails/all_docs_procesed}')
