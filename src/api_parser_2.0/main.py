@@ -30,13 +30,15 @@ def get_cik():
 
     return snp_str_df
 
-def download_report(cik, year, qtr, report_type):
+def download_report(year, qtr):
     base_url = "https://www.sec.gov/Archives/edgar/full-index"
-    index_url = f"{base_url}/{year}/QTR{qtr}/master.idx"
+    index_url = f"{base_url}/{year}/QTR{qtr}/xbrl.idx"
     
     # Fetch the master index file
     response = requests.get(index_url, headers=get_random_headers())
+    print(response)
     lines = response.text.splitlines()
+
     return lines
 
 
@@ -144,7 +146,7 @@ year = '2020'
 qtr = '1'
 report_types = ['10-Q', '10-K']
 
-lines = download_report(cik, year, qtr, report_types)
+lines = download_report(year, qtr)
 
 report_releas_lst = get_all_links(lines)
 
