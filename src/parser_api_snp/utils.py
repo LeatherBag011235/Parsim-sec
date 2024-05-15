@@ -77,8 +77,6 @@ def get_all_links(lines):
 def get_snp_links(reports_df):
 
     snp_remainings_df = get_snp_cik()
-    #unique_ciks = set(snp_str_df["CIK"])
-    #reports_list = []
 
     reports_df = reports_df[reports_df['type'].isin(['10-K', '10-Q'])]
 
@@ -91,20 +89,7 @@ def get_snp_links(reports_df):
     snp_quarter_df.rename(columns={'Symbol': 'ticker'}, inplace=True)
 
     snp_quarter_df = snp_quarter_df[['ticker', 'cik', 'name', 'type', 'filed_date', 'file']]
-    #for sublist in report_releas_lst:
-#
-    #    if (sublist[0] in unique_ciks) and (sublist[2] in {'10-K', '10-Q'}):
-    #        res_list = []
-#
-    #        ticker = snp_str_df.loc[snp_str_df["CIK"] == sublist[0], "Symbol"].item()
-#
-#
-    #        res_list.append(ticker)
-    #        res_list.extend(sublist)
-#
-    #        reports_list.append(res_list)
-    #print('ready to create a total pd.df')
-    #snp_quarter_df = pd.DataFrame(reports_list, columns=['ticker', 'cik', 'name', 'type', 'fild_date', 'file'])
+
     print('pd df created')
     return snp_quarter_df
 

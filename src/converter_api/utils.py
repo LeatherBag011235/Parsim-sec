@@ -26,6 +26,8 @@ def make_texts_same_len(company_dict):
 
 def extract_strings(base_directory):
 
+    date_pattern = re.compile(r'(\d{4}-\d{2}-\d{2})')
+
     # Dictionary to hold processed data for each company
     dict_with_all_companies = {}
 
@@ -41,16 +43,14 @@ def extract_strings(base_directory):
             for filename in os.listdir(company_path):
                 
                 file_path = os.path.join(company_path, filename)
-                print(file_path)
 
-                #with open(file_path, 'r') as file:
-#
-                #    data = file.read()
-                #    company_dict[filename] = data.split()
-                #if file_path.endswith('.parquet'):
                 df = pl.read_parquet(file_path)
-                lst = df.get_column(df.columns[0]).to_list()
-                company_dict[filename] = lst
+                report_lst = df.get_column(df.columns[0]).to_list()
+
+                match = date_pattern.search(file_path)
+                report_date = match.group(1)
+
+                company_dict[report_date] = report_lst
                
             dict_with_all_companies[company_dir] = make_texts_same_len(company_dict)
     
@@ -65,7 +65,6 @@ def save_to_parquet(company_name, company_dict, base_directory):
     drectory_name = match.group(1) if match else None
 
     df = pl.DataFrame(company_dict)
-    #print(df)
 
     # Determine the output directory and file name
     output_dir = os.path.join('prepared_data', drectory_name)

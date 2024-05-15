@@ -159,6 +159,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-Parsim-sec/src/Analysis/full_10_Q_scores
+Parsim-sec/src/Analysis/data
 /raw_data
 /prepared_data
