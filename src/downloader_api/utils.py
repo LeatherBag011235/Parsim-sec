@@ -5,7 +5,7 @@ from fake_useragent import UserAgent
 import requests
 import time
 import unidecode
-from .consts import start_pattern, end_pattern
+from .consts import start_pattern, steart_pattern_reserve, end_pattern
 import polars as pl
 
 #def get_random_headers():
@@ -19,11 +19,13 @@ headers = {
 
 def get_soup(session, company_name, url):
     ATTEMPTS_AMOUNT = 3
+    backoff_time = 2
+
+    full_url = f'https://www.sec.gov/Archives/{url}'
+
     for attempt in range(ATTEMPTS_AMOUNT):
         try:
-            ful_url = f'https://www.sec.gov/Archives/{url}'
-
-            response = session.get(ful_url, headers=headers, timeout=10)
+            response = session.get(full_url, headers=headers, timeout=15)
 
             #response = requests.get(url, headers=get_random_headers(), timeout=10)
             content  = response.text
@@ -32,31 +34,36 @@ def get_soup(session, company_name, url):
             if start_match:
                 start_idx = start_match.end()
             else:
-                print(f'fail to find start idx in {company_name} ==> {ful_url} \n use <html> instead')
-                start_match = end_pattern.search(content)
+                print(f'fail to find start idx in {company_name} ==> {full_url} \n use <html> instead')
+                start_match = steart_pattern_reserve.search(content)
 
                 if start_match:
                     start_idx = start_match.end()
                 else:
-                    print(f'fail to find start idx with <html> {company_name} ==> {ful_url} \n !!!!!!!!!!!!')
+                    print(f'fail to find start idx with <html> {company_name} ==> {full_url} \n !!!!!!!!!!!!')
 
             end_match = end_pattern.search(content, start_idx)
             if end_match:
                 end_idx = end_match.end()
             else:
-                print(f'fail to find end idx in{company_name} ==> {ful_url}')
+                print(f'fail to find end idx in{company_name} ==> {full_url}')
         
             html_content = content[start_idx:end_idx]
             soup = BeautifulSoup(html_content, 'html.parser')
 
-            print(f"Page {company_name} ==> {ful_url} paresed successfully.")
+            print(f"Page {company_name} ==> {full_url} paresed successfully.")
 
             return soup
         
         
-        except requests.exceptions.ConnectTimeout:
-            print(f"Attempt {attempt + 1} of {ATTEMPTS_AMOUNT} failed for {ful_url} retrying after delay...")
-            time.sleep(3) 
+        #except requests.exceptions.ConnectTimeout:
+        except requests.exceptions.RequestException as e:
+            print(f"Attempt {attempt + 1} of {ATTEMPTS_AMOUNT} failed for {full_url} retrying after {backoff_time} seconds...")
+            time.sleep(backoff_time) 
+            backoff_time *= 2
+
+    print(f"All attempts failed for {company_name} ==> {full_url}")
+    return None
 
 
 def delete_tabeles(soup):
