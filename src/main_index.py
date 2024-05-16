@@ -17,9 +17,9 @@ start_time = time.time()
 files_to_convert = 'full_snp_five_hundred'
 
 def main():
-    #company_links_object = get_company_links_object()
-    #download_files(company_links_object)
-    convert_files(files_to_convert)
+    company_links_object = get_company_links_object()
+    download_files(company_links_object)
+    #convert_files(files_to_convert)
     
 if __name__ == '__main__':
     main()

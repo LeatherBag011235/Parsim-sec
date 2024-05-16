@@ -43,10 +43,20 @@ def get_snp_cik():
     snp_str_df = qnique_cik.drop(columns=['Count'])
 
     loaded_comapines_set = check_remaining_companies()
-    mask = snp_str_df['Symbol'].apply(lambda x: not any(s in x for s in loaded_comapines_set))
+
+    #print(f'loaded_comapines_set len: {len(loaded_comapines_set)}')
+    #print(snp_str_df['Symbol'])
+
+    mask = snp_str_df['Symbol'].apply(lambda x: x not in loaded_comapines_set)
+
+    #print('!!!', mask.sum())
+
     snp_remainings_df = snp_str_df[mask]
 
+    #print(f'shape of snp_remainings_df: {snp_remainings_df.shape}')
+    #print(snp_remainings_df)
     return snp_remainings_df
+
 
 def download_report(year, qtr):
     base_url = "https://www.sec.gov/Archives/edgar/full-index"
@@ -86,11 +96,12 @@ def get_snp_links(reports_df):
     snp_remainings_df.set_index('CIK', inplace=True)
 
     snp_quarter_df = reports_df.merge(snp_remainings_df[['Symbol']], left_on='cik', right_index=True, how='inner')
+
     snp_quarter_df.rename(columns={'Symbol': 'ticker'}, inplace=True)
 
     snp_quarter_df = snp_quarter_df[['ticker', 'cik', 'name', 'type', 'filed_date', 'file']]
 
-    print('pd df created')
+    print(f'pd df created{snp_quarter_df}')
     return snp_quarter_df
 
 def get_links_n_dates(snp_quarter_df, company_name):
