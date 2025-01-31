@@ -98,8 +98,6 @@ def clean_text(text):
     return text 
 
 def save_file(text, company_name, filed_date):
-                
-            
     file_name = f'{filed_date}.parquet'
    
     text_col = pl.DataFrame(text.split())

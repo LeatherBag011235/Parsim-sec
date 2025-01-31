@@ -1,6 +1,5 @@
 import requests
 from fake_useragent import UserAgent
-import requests
 import pandas as pd
 import os
 
